@@ -1,23 +1,17 @@
 # Real-Time Trading Platform (Testnet)
 
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/AZ80UqO2)
-
 A full-stack, real-time cryptocurrency trading platform built with event-driven architecture. This system demonstrates microservices design, WebSocket-based real-time updates, and proper separation of concerns for scalable trading applications.
 
 **TESTNET ONLY:** This platform uses Binance Testnet and virtual funds. Not for production use.
 
 ---
 
-## 🎥 Demo Video
-
-**[Watch Demo Video Here](#)** *(Replace with your YouTube demo link)*
-
----
-
 ## 🚀 Live Deployment
 
-- **Frontend:** https://your-frontend-url.vercel.app  
-- **Backend API:** https://your-backend-url.railway.app  
+- **Frontend:** https://novatrade-frontend.vercel.app
+- **Backend API:** https://novatrade-backend.onrender.com
+- **Execution Service:** https://novatrade-execution.onrender.com
+- **Event Service (WebSocket):** wss://novatrade-events.onrender.com
 
 ---
 
@@ -29,18 +23,18 @@ A full-stack, real-time cryptocurrency trading platform built with event-driven 
 graph TD
     User[User / Frontend] -->|HTTP POST /orders| API[API Gateway]
     User -->|WebSocket| Event[Event Service]
-    
+
     API -->|Publish Command| Redis[(Redis Pub/Sub)]
-    
+
     Redis -->|Subscribe Command| Exec[Execution Service]
     Exec -->|REST API| Binance[Binance Testnet]
-    
+
     Binance -->|Order Update| Exec
     Exec -->|Publish Event| Redis
-    
+
     Redis -->|Subscribe Event| Event
     Event -->|Push Update| User
-    
+
     API -->|Log| DB[(PostgreSQL)]
     Exec -->|Log| DB
 ```
@@ -79,7 +73,7 @@ graph TD
 trading-platform/
 ├── apps/
 │   ├── backend/              # Express.js API Gateway
-│   ├── execution-service/    # Order execution worker
+│   ├── execution-service/    # Order execution worker (Web Service)
 │   ├── event-service/        # WebSocket real-time service
 │   └── frontend/             # Next.js 14 UI
 │
@@ -97,43 +91,51 @@ trading-platform/
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL
-- Redis
-- Binance Testnet API keys
+- Docker & Docker Compose (for local PostgreSQL + Redis)
+- Binance Testnet API keys ([Get here](https://testnet.binance.vision))
 
 ---
 
 ### 1. Clone & Install
 
 ```bash
-git clone <repo-url>
-cd trading-platform
+git clone https://github.com/Rishabhjain2003/NovaTrade-Testnet-Terminal.git
+cd NovaTrade-Testnet-Terminal/trading-platform
 npm install
 ```
 
 ---
 
-### 2. Environment Variables
+### 2. Start Local Infrastructure
 
-Create `.env` files in:
-
-- `apps/backend`
-- `apps/execution-service`
-- `apps/event-service`
-- `apps/frontend/.env.local`
-
-Use `.env.example` as reference.
-
-**Required variables:**
-
-- `DATABASE_URL`
-- `REDIS_URL`
-- `JWT_SECRET`
-- `ENCRYPTION_KEY` (32 characters)
+```bash
+docker-compose up -d
+sleep 5
+```
 
 ---
 
-### 3. Database Setup
+### 3. Environment Variables
+
+Create `.env` files in each service using `.env.example` as reference:
+
+- `apps/backend/.env`
+- `apps/execution-service/.env`
+- `apps/event-service/.env`
+- `apps/frontend/.env.local`
+
+**Required variables:**
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string |
+| `JWT_SECRET` | Secret for JWT signing |
+| `ENCRYPTION_KEY` | Exactly 32 characters |
+
+---
+
+### 4. Database Setup
 
 ```bash
 npm run db:generate
@@ -142,29 +144,25 @@ npm run db:push
 
 ---
 
-### 4. Run Locally
+### 5. Run Locally
 
 Open **four terminals** and run:
 
 ```bash
-# API Gateway
+# Terminal 1 - API Gateway
 npm run dev:backend
-```
 
-```bash
-# Execution Worker
+# Terminal 2 - Execution Worker
 npm run dev:execution
-```
 
-```bash
-# WebSocket Event Service
+# Terminal 3 - WebSocket Event Service
 npm run dev:events
-```
 
-```bash
-# Frontend
+# Terminal 4 - Frontend
 npm run dev:frontend
 ```
+
+Frontend runs at: http://localhost:3000
 
 ---
 
@@ -179,9 +177,7 @@ npm run dev:frontend
 
 ### Trading
 
-- `POST /api/trading/orders`
-  - Returns `PENDING` immediately
-  - Execution happens asynchronously
+- `POST /api/trading/orders` — Returns `PENDING` immediately; execution is async
 - `GET /api/trading/orders`
 - `GET /api/trading/positions`
 
@@ -192,13 +188,29 @@ npm run dev:frontend
 **Connection:**
 
 ```
-ws://localhost:3002?token=<JWT>
+wss://novatrade-events.onrender.com?token=<JWT>
 ```
 
 **Events received:**
 
 - `PRICE_UPDATE`
-- `ORDER_UPDATE` (PENDING, FILLED, REJECTED)
+- `ORDER_UPDATE` — status: `PENDING` | `FILLED` | `REJECTED`
+- `CONNECTED` — on successful connection
+
+---
+
+## ☁️ Deployment
+
+Deployed using **Render** (backend services) and **Vercel** (frontend).
+
+| Service | Platform | Type |
+|---|---|---|
+| Backend API | Render | Web Service |
+| Execution Service | Render | Web Service |
+| Event Service | Render | Web Service |
+| PostgreSQL | Render | Managed DB |
+| Redis | Render | Key Value |
+| Frontend | Vercel | Next.js |
 
 ---
 
@@ -207,9 +219,7 @@ ws://localhost:3002?token=<JWT>
 **Estimated Usage: ~20%**
 
 - Architecture and service boundaries designed manually
-- LLM used for:
-  - Boilerplate setup
-  - Debugging Redis and TypeScript issues
+- LLM used for boilerplate setup and debugging Redis/TypeScript issues
 - Core trading logic and WebSocket state handling written manually
 
 ---
@@ -223,4 +233,4 @@ ws://localhost:3002?token=<JWT>
 
 ---
 
-**Built by Rishabh Jain**
+**Built by Rishabh Jain** | [GitHub](https://github.com/Rishabhjain2003)

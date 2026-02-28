@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import express from 'express';
 import { createClient } from 'redis';
 import { PrismaClient } from '@prisma/client';
 import { OrderCommand, OrderEvent } from '@trading-platform/shared';
@@ -6,6 +7,11 @@ import { executeBinanceOrder } from './binance';
 import { decryptApiKey } from './utils/encryption';
 
 dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 10000;
+app.get('/health', (req, res) => res.json({ status: 'ok', service: 'execution' }));
+app.listen(PORT, () => console.log(`✅ Execution Service HTTP on port ${PORT}`));
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 const prisma = new PrismaClient();

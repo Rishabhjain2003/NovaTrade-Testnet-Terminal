@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: novatrade-events
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: WS_PORT
+        value: 10000
+      - key: BINANCE_WS_URL
+        value: wss://stream.testnet.binance.vision

@@ -7,7 +7,7 @@ import { setupBinancePriceStreams } from './binance-ws';
 
 dotenv.config();
 
-const WS_PORT = parseInt(process.env.WS_PORT || '3002');
+const WS_PORT = parseInt(process.env.PORT || '3002');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
